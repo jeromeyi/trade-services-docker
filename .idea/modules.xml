@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project version="4">
+  <component name="ProjectModuleManager">
+    <modules>
+      <module fileurl="file://$PROJECT_DIR$/discovery-service/discovery-service.iml" filepath="$PROJECT_DIR$/discovery-service/discovery-service.iml" />
+      <module fileurl="file://$PROJECT_DIR$/sale-contract-service/sale-contract-service.iml" filepath="$PROJECT_DIR$/sale-contract-service/sale-contract-service.iml" />
+      <module fileurl="file://$PROJECT_DIR$/sale-note-service/sale-note-service.iml" filepath="$PROJECT_DIR$/sale-note-service/sale-note-service.iml" />
+      <module fileurl="file://$PROJECT_DIR$/trade-services.iml" filepath="$PROJECT_DIR$/trade-services.iml" />
+    </modules>
+  </component>
+</project>
