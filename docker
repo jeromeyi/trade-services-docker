@@ -1,0 +1,164 @@
+安装docker
+
+说明：此次安装没有根据官网安装教程的步骤进行，而是直接yum install安装。
+安装docker yum install docker
+关闭防火墙 service firewalld stop
+启动服务 service docker start
+设置开机启动 systemctl enable docker
+配置docker
+
+说明：swarm是通过Docker api而进行docker管理的，所以需要将docker的rest api启动。
+
+Centos docker配置文件位置：/etc/sysconfig/docker
+Ubuntu docker配置文件位置：/etc/default/docker
+
+echo "DOCKER_OPTS=\"\$DOCKER_OPTS --registry-mirror=http://f2d6cb40.m.daocloud.io\"" | sudo tee -a /etc/default/docker
+service docker restart
+
+
+
+ mkdir -p /home/docker/demo
+chmod 777 /home/docker/demo/
+
+
+$ service docker restart
+
+我用的版本CentOS Linux release 7.2.1511 (Core) 好像这么添加无效，
+直接修改 vim /usr/lib/systemd/system/docker.service
+在dockerd后面加参数
+ExecStart=/usr/bin/dockerd --registry-mirror=http://hub-mirror.c.163.com
+重启docker以后，ps看docker进程为/usr/bin/dockerd --registry-mirror=http://hub-mirror.c.163.com，这个样子应该是生效了，嗖嗖的就下载完啦~
+
+cd /home/docker/sale-service 到dockerfile及JAR包文件目录
+
+docker build -t discovery-service .
+
+打包完成后运行docker images查看镜像,发现有我们的eureka-server镜像了
+
+将镜像运行在容器中：docker run -d -p 8761:8761 discovery-service  //-d 表示后台运行，-p是端口映射
+
+成功后查看正在运行容器: docker ps 发现eureka-server已经运行起来，访问http://IP1:1111就出现了我们熟悉的注册中心的界面了，bingo
+
+
+docker push jeromeyi/discovery-service
+
+docker run -p 8761:8761 discovery-service
+docker run -p 8761:8761 --name discovery-service discovery-service
+docker run -p 8761:8761  -it --name discovery-service --net host discovery-service sh
+
+docker rm 5f28d5d3d23d
+docker rmi sale-contract-service
+cd /home/docker/sale-service
+docker build -t sale-contract-service .
+
+docker run -p 8762:8762 --name sale-contract-service --link discovery-service:discovery-service sale-contract-service
+docker run -p 8762:8762  -it --name sale-contract-service  --link discovery-service:discovery-service sale-contract-service sh
+docker run -p 8762:8762 sale-contract-service
+
+docker run -p 8763:8762 --name sale-contract-service1 --link discovery-service:discovery-service sale-contract-service
+docker run -p 8763:8762  -it --name sale-contract-service1 --net host sale-contract-service sh
+docker run -p 8763:8762 sale-contract-service
+
+docker run -p 8764:8764 --link discovery-service:discovery-service --link sale-contract-service:sale-contract-service --link sale-contract-service1:sale-contract-service sale-note-service
+docker run -p 8764:8764  -it --name sale-note-service --net host sale-note-service sh
+docker run -p 8764:8764 sale-note-service
+
+Docker常用命令
+1.杀死所有正在运行的容器
+
+docker kill $(docker ps -a -q)
+2.删除所有已经停止的容器
+
+docker rm $(docker ps -a -q)
+3.删除所有镜像
+
+docker rmi $(docker images -q)
+4.关闭容器
+
+docker stop CONTAINER ID或者NAMES
+5.重新启动关闭的容器
+
+docker start CONTAINER ID或者NAMES
+6.移除本地容器
+
+docker rm CONTAINER ID或者NAMES
+7.查看本地容器
+
+docker ps  //查看正在运行的容器
+docker ps -a //查看所有容器
+8.查看本地镜像
+
+docker images
+9.创建镜像
+
+docker build -t name:tag Dockerfile路径
+10.修改本地镜像标记
+
+ docker tag  IMAGE ID  name:tag
+ docker rmi name:tag
+11.删除本地镜像
+
+docker rmi name:tag或者IMAGE ID
+12.进入容器
+
+docker exec -it IMAGE ID或者NAMES /bin/bash
+13.获取镜像中心的镜像
+
+docker pull name:tag
+14.获取容器的端口映射配置
+
+docker port CONTAINER ID或者NAMES
+
+
+https://www.cnblogs.com/wherein/p/6862911.html
+
+Docker 如何把镜像上传到docker hub
+1 首先你得准备一个hub 的帐号, 去 https://hub.docker.com 注册吧!
+
+2 在hub那里新建一个仓库, 这个就类似于github那边的..create ---> create repository(创建知识库) 然后随便搞个名字, 我这里就叫ubuntu吧 所以路径就是wherein/ubuntu了
+
+3 运行 docker ps 查看容器, 这里就是要获取到CONTAINER ID嘛
+
+
+
+4 commit一个容器  命令: docker commit CONTAINER ID wherein/ubuntu
+
+
+
+5 接下来就是登录一个hub帐号了 命令: docker login  如果成功则显示下图
+
+
+
+6 将刚才的镜像push 到你的hub 那里去 命令: docker push wherein/ubuntu:latest  这个latest其实就是一个tag name 会在hub的Tags那里显示
+
+
+
+注: 这里注意一下, 有时push会超时的, 没关系, 再push一次就好了
+
+
+
+7 现在验证一下 命令: docker inspect wherein/ubuntu
+
+
+
+8 最后看一下你的hub中的tags 是否有了新的更新
+
+
+
+嗯, 看来是成功了!
+
+https://hub.docker.com/r/jeromeyi/discovery-service/
+jeromeyi
+143docker279
+
+docker logs -f -t --since="2017-05-31" --tail=10 edu_web_1
+
+--since : 此参数指定了输出日志开始日期，即只输出指定日期之后的日志。
+
+-f : 查看实时日志
+
+-t : 查看日志产生的日期
+
+-tail=10 : 查看最后的10条日志。
+
+edu_web_1 : 容器名称
