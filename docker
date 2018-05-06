@@ -1,7 +1,37 @@
 安装docker
 
+今天安装docker最新版过程中遇到一个报错显示
+
+正在解决依赖关系
+–> 正在检查事务
+—> 软件包 docker-engine-selinux.noarch.0.1.12.3-1.el7.centos 将被 安装
+–> 处理 docker-engine-selinux-1.12.3-1.el7.centos.noarch 与 docker-selinux 的冲突
+–> 解决依赖关系完成
+错误：docker-engine-selinux conflicts with docker-selinux-1.10.3-46.el7.centos.14.x86_64
+ 您可以尝试添加 –skip-broken 选项来解决该问题
+ 您可以尝试执行：rpm -Va –nofiles –nodigest
+
+经过一段时间google终于解决了问题分享给大家
+
+qq%e6%88%aa%e5%9b%be20161028145642
+因为安装这个docker版本之前安装的docker-io版本虽然之前已经yum  remove docker 但是还是有残留
+
+1.查看已经安装的docker版本
+
+
+yum list installed|grep docker
+1
+yum list installed|grep docker
+2.移除相关docker软件
+
+
+yum remove docker-selinux.x86_64 -y
+1
+yum remove docker-selinux.x86_64 -y
+再次安装docker就成功了
+
 说明：此次安装没有根据官网安装教程的步骤进行，而是直接yum install安装。
-安装docker yum install docker
+安装docker       yum install docker
 关闭防火墙 service firewalld stop
 启动服务 service docker start
 设置开机启动 systemctl enable docker
@@ -22,6 +52,9 @@ chmod 777 /home/docker/demo/
 
 
 $ service docker restart
+
+
+
 
 我用的版本CentOS Linux release 7.2.1511 (Core) 好像这么添加无效，
 直接修改 vim /usr/lib/systemd/system/docker.service
@@ -63,6 +96,7 @@ docker run -p 8764:8764 --link discovery-service:discovery-service --link sale-c
 docker run -p 8764:8764  -it --name sale-note-service --net host sale-note-service sh
 docker run -p 8764:8764 sale-note-service
 
+重新打个Image run的时候加个参数 --net=host。这样就会默认使用宿主机的IP。
 Docker常用命令
 1.杀死所有正在运行的容器
 
@@ -162,3 +196,67 @@ docker logs -f -t --since="2017-05-31" --tail=10 edu_web_1
 -tail=10 : 查看最后的10条日志。
 
 edu_web_1 : 容器名称
+
+
+tar -xvf apache-maven-3.3.9-bin.tar.gz
+
+mv apache-maven-3.3.9 /usr/local/apache-maven
+
+文件存放好之后，设置环境变量，打开etc/profile，在文件中加入下边的代码：
+
+写入环境变量
+
+vi /etc/profile
+
+最后一行加入
+
+这个前提是安装了java1.8
+
+export JAVA_HOME=/usr/local/jdk1.8
+export MAVEN_HOME=/usr/local/apache-maven
+export PATH=$JAVA_HOME/bin:$JAVA_HOME/jre/bin:$MAVEN_HOME/bin:$PATH
+
+再执行
+
+source /etc/profile
+
+
+在每个服务存在POM.XML目录下执行
+mvn clean package -U -DskipTests docker:build
+
+docker images
+
+在docker-compose.yml所在目录下执行以下命令，启动所有容器：
+
+sudo docker-compose up -d
+
+http://localhost:8081/
+
+docker-compose scale provider=3
+
+docker-compose scale provider=1
+
+在每个服务存在POM.XML目录下执行
+mvn clean package -U -DskipTests docker:build
+
+docker images
+
+在docker-compose.yml所在目录下执行以下命令，启动所有容器：
+
+sudo docker-compose up -d
+
+http://localhost:8081/
+
+docker-compose scale provider=3
+
+
+
+docker-compose scale provider=1
+
+docker logs -f springcloudscaledemo_consumer_1
+
+docker-compose stop provider
+
+docker-compose start provider
+
+docker logs -f springcloudscaledemo_provider_2
